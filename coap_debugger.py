@@ -19,75 +19,13 @@ import aiocoap
 from aiocoap.numbers import OptionNumber
 
 from aiocoap_backend import Cancelled, run_exchange
-
-
-TYPES = ("CON", "NON", "ACK", "RST")
-METHODS = {"GET": 1, "POST": 2, "PUT": 3, "DELETE": 4, "FETCH": 5,
-           "PATCH": 6, "iPATCH": 7, "Empty ping": 0}
-CODE_NAMES = {
-    0: "Empty", **{v: k for k, v in METHODS.items() if v},
-    65: "Created", 66: "Deleted", 67: "Valid", 68: "Changed",
-    69: "Content", 95: "Continue", 128: "Bad Request", 129: "Unauthorized",
-    130: "Bad Option", 131: "Forbidden", 132: "Not Found",
-    133: "Method Not Allowed", 134: "Not Acceptable",
-    136: "Request Entity Incomplete", 137: "Conflict",
-    140: "Precondition Failed", 141: "Request Entity Too Large",
-    143: "Unsupported Content-Format", 157: "Too Many Requests",
-    160: "Internal Server Error", 161: "Not Implemented",
-    162: "Bad Gateway", 163: "Service Unavailable", 164: "Gateway Timeout",
-    165: "Proxying Not Supported", 168: "Hop Limit Reached",
-}
-FORMATS = (
-    "None (omit Content-Format)", "0 - text/plain; charset=utf-8",
-    "40 - application/link-format", "41 - application/xml",
-    "42 - application/octet-stream", "47 - application/exi",
-    "50 - application/json", "60 - application/cbor",
-    "110 - application/senml+json", "112 - application/senml+cbor",
+from defaults import (
+    CODE_NAMES, DEFAULT_ACK_RANDOM_FACTOR, DEFAULT_ACK_TIMEOUT, DEFAULT_CONTENT_FORMAT,
+    DEFAULT_DEVICE_IP, DEFAULT_DEVICE_PORT, DEFAULT_DISPLAY_MODE, DEFAULT_ENCODING,
+    DEFAULT_LOCAL_PORT, DEFAULT_MAX_RETRANSMIT, DEFAULT_MESSAGE_LIMIT, DEFAULT_METHOD,
+    DEFAULT_MESSAGE_TYPE, DEFAULT_RESPONSE_TIMEOUT, DEFAULT_TOKEN_LENGTH, EXCHANGE_LOG_LIMIT,
+    FORMATS, METHODS, OPTIONS, OPTION_CHOICES, RESPONSE_HISTORY_LIMIT, TYPES, OptionSpec,
 )
-
-
-@dataclass(frozen=True)
-class OptionSpec:
-    name: str
-    kind: str
-    minimum: int
-    maximum: int
-    repeat: bool = False
-    hint: str = ""
-
-
-# The complete RFC 7252 option set, plus common standardized UDP extensions.
-# Unknown/new registry entries remain usable through the numeric option editor.
-OPTIONS = {
-    1: OptionSpec("If-Match", "Opaque", 0, 8, True, "ETag bytes; empty matches any existing resource."),
-    3: OptionSpec("Uri-Host", "UTF-8", 1, 255, hint="Logical host, not the UDP destination IP."),
-    4: OptionSpec("ETag", "Opaque", 1, 8, True, "Representation identifier bytes."),
-    5: OptionSpec("If-None-Match", "Empty", 0, 0, hint="Presence only; no value."),
-    6: OptionSpec("Observe", "UInt", 0, 3, hint="GET: 0 register, 1 deregister."),
-    7: OptionSpec("Uri-Port", "UInt", 0, 2, hint="Logical URI port; destination port is set above."),
-    8: OptionSpec("Location-Path", "UTF-8", 0, 255, True, "One location path segment per row."),
-    9: OptionSpec("OSCORE", "Opaque", 0, 255, hint="Raw option only; no OSCORE cryptography."),
-    11: OptionSpec("Uri-Path", "UTF-8", 0, 255, True, "One segment per row; omit slash separators."),
-    12: OptionSpec("Content-Format", "UInt", 0, 2, hint="Use payload Content-Format selector, or omit it there."),
-    14: OptionSpec("Max-Age", "UInt", 0, 4, hint="Seconds; absent response option implies 60."),
-    15: OptionSpec("Uri-Query", "UTF-8", 0, 255, True, "One query component per row, without &."),
-    16: OptionSpec("Hop-Limit", "UInt", 1, 1, hint="Proxy hop budget, 1 through 255."),
-    17: OptionSpec("Accept", "UInt", 0, 2, hint="Desired response Content-Format number."),
-    19: OptionSpec("Q-Block1", "UInt", 0, 3, hint="Manual block field: (NUM << 4) | (M << 3) | SZX."),
-    20: OptionSpec("Location-Query", "UTF-8", 0, 255, True),
-    21: OptionSpec("EDHOC", "Empty", 0, 0, hint="Raw option only; no EDHOC handshake implementation."),
-    23: OptionSpec("Block2", "UInt", 0, 3, hint="Manual block field: (NUM << 4) | (M << 3) | SZX."),
-    27: OptionSpec("Block1", "UInt", 0, 3, hint="Manual block field: (NUM << 4) | (M << 3) | SZX."),
-    28: OptionSpec("Size2", "UInt", 0, 4),
-    31: OptionSpec("Q-Block2", "UInt", 0, 3),
-    35: OptionSpec("Proxy-Uri", "UTF-8", 1, 1034, hint="Mutually exclusive with Uri-* and Proxy-Scheme."),
-    39: OptionSpec("Proxy-Scheme", "UTF-8", 1, 255),
-    60: OptionSpec("Size1", "UInt", 0, 4),
-    252: OptionSpec("Echo", "Opaque", 1, 40),
-    258: OptionSpec("No-Response", "UInt", 0, 1, hint="Bit mask: 2 suppress 2.xx, 8 suppress 4.xx, 16 suppress 5.xx."),
-    292: OptionSpec("Request-Tag", "Opaque", 0, 8, True),
-}
-OPTION_CHOICES = tuple(f"{n} - {s.name}" for n, s in OPTIONS.items())
 
 
 def parse_bytes(text: str, mode: str) -> bytes:
@@ -261,13 +199,13 @@ def summarize(message: Message, raw: bytes) -> str:
 
 @dataclass(frozen=True)
 class Settings:
-    ack_timeout: float = 2.0
-    ack_random_factor: float = 1.5
-    max_retransmit: int = 4
-    response_timeout: float = 60.0
-    message_limit: int = 128
-    local_port: int = 0
-    token_length: int = 4
+    ack_timeout: float = DEFAULT_ACK_TIMEOUT
+    ack_random_factor: float = DEFAULT_ACK_RANDOM_FACTOR
+    max_retransmit: int = DEFAULT_MAX_RETRANSMIT
+    response_timeout: float = DEFAULT_RESPONSE_TIMEOUT
+    message_limit: int = DEFAULT_MESSAGE_LIMIT
+    local_port: int = DEFAULT_LOCAL_PORT
+    token_length: int = DEFAULT_TOKEN_LENGTH
 
     def validate(self) -> None:
         for name in ("ack_timeout", "ack_random_factor", "response_timeout"):
@@ -332,15 +270,15 @@ class App:
         root.title("CoAP Debugger - UDP device inspector")
         root.geometry("1000x820")
         root.minsize(800, 650)
-        self.ip = tk.StringVar(value="192.168.0.100")
-        self.port = tk.StringVar(value="5683")
-        self.method = tk.StringVar(value="GET")
-        self.msg_type = tk.StringVar(value="CON")
+        self.ip = tk.StringVar(value=DEFAULT_DEVICE_IP)
+        self.port = tk.StringVar(value=str(DEFAULT_DEVICE_PORT))
+        self.method = tk.StringVar(value=DEFAULT_METHOD)
+        self.msg_type = tk.StringVar(value=DEFAULT_MESSAGE_TYPE)
         self.mid = tk.StringVar()
         self.token = tk.StringVar()
-        self.encoding = tk.StringVar(value="ASCII")
-        self.content_format = tk.StringVar(value=FORMATS[0])
-        self.display_mode = tk.StringVar(value="ASCII")
+        self.encoding = tk.StringVar(value=DEFAULT_ENCODING)
+        self.content_format = tk.StringVar(value=DEFAULT_CONTENT_FORMAT)
+        self.display_mode = tk.StringVar(value=DEFAULT_DISPLAY_MODE)
         self.status = tk.StringVar(value="Ready. Add Uri-Path segments or use Set resource.")
         self._build()
         self._load_settings()
@@ -463,7 +401,7 @@ class App:
     def _log(self, text: str) -> None:
         self.log.configure(state="normal")
         self.log.insert("end", f"{time.strftime('%H:%M:%S')} {text}\n")
-        if self.log.count("1.0", "end-1c", "chars")[0] > 2_000_000:
+        if self.log.count("1.0", "end-1c", "chars")[0] > EXCHANGE_LOG_LIMIT:
             self.log.delete("1.0", "end-2000001c")
         self.log.see("end")
         self.log.configure(state="disabled")
@@ -700,7 +638,7 @@ class App:
                 elif kind == "response":
                     self.responses.append(value)
                     # Bounded history prevents unbounded growth for long observations.
-                    if len(self.responses) > 100:
+                    if len(self.responses) > RESPONSE_HISTORY_LIMIT:
                         self.responses.pop(0)
                     labels = tuple(f"{i + 1}: {TYPES[msg.type]} {msg.code >> 5}.{msg.code & 31:02d} "
                                    f"{CODE_NAMES.get(msg.code, '')} | MID {msg.mid} | {len(msg.payload)} payload bytes"

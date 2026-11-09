@@ -142,46 +142,6 @@ will eventually reach the configured response timeout. Cancel is available
 during waiting/retries. The UI remains responsive throughout network activity.
 Do not shorten retry defaults indiscriminately on constrained networks.
 
-## ProsecCoAP compatibility
-
-The upstream [README](https://raw.githubusercontent.com/decadenza/ProsecCoAP/main/README.md)
-and [Definitions.h](https://raw.githubusercontent.com/decadenza/ProsecCoAP/main/src/Definitions.h)
-describe RFC 7252 UDP messages, port 5683, tokens up to eight bytes, the four
-base request methods, and the formats offered here. Their default
-`COAP_MAX_MESSAGE_SIZE` is **128 bytes for the entire datagram**, including the
-header, token, options and payload. Oversized incoming messages can be dropped.
-This tool therefore defaults to the same outgoing limit. Increase it in
-Settings only if your server supports a larger buffer (and configure the
-server accordingly). General CoAP devices commonly accept larger messages;
-1152 bytes is a typical fragmentation-avoiding upper target, not a guarantee.
-
-To use the upstream README's server example:
-
-```text
-IP:             your board's actual IP (example: 192.168.0.99)
-Port:           5683
-Method / type:  GET / CON
-Resource:       /my-endpoint
-Payload:        empty
-Content-Format: None
-Token / MID:    blank (automatic)
-```
-
-The example returns **2.05 Content**, Content-Format **0**, payload ASCII **42**
-(HEX **34 32**). The GUI's requested default IP is intentionally .100, not the
-upstream example's .99. Use CON with ProsecCoAP's default `intoResponse()`,
-which constructs an ACK response. The client can also display a matching
-token/MID ACK reply to NON for interoperability, though general servers should
-use NON responses for NON requests.
-
-Compatibility is based on upstream protocol definitions and tested
-ProsecCoAP-style UDP fixtures, **not a physical Arduino/ESP board run**. Resources,
-methods, Observe behavior, buffer overrides and extension support depend on
-your firmware. Do not assume ProsecCoAP supports every extension in the editor.
-This is plain **coap:// UDP only**: no DTLS/coaps, TCP, multicast discovery,
-automatic proxying, or automatic content deserialization. Use only devices and
-networks you are authorized to test; traffic is not encrypted.
-
 ## Checks
 
 ```sh
@@ -195,31 +155,3 @@ required. GUI smoke tests run only when a graphical display is available
 ```sh
 xvfb-run -a python -m unittest discover -s tests -v
 ```
-
-## Maintenance
-
-`coap_debugger.py` owns the GUI, input validation, summaries and payload
-conversion. Its small `Message`/`Option` value adapters use **aiocoap's
-message and option codecs**; there is no application-owned wire serializer.
-`aiocoap_backend.py` owns the asyncio integration and lifecycle. It runs
-`Context.request(..., handle_blockwise=False)` with per-message
-`TransportTuning`. aiocoap owns token matching, CON backoff, ACK/RST processing
-and Observe sequence filtering; only user-facing idle timeouts and cancellation
-are implemented by the application.
-
-A connected UDP `MessageInterface` adds raw RX/TX capture, destination filtering,
-the outgoing size limit and a selectable local port, without adding a second
-CoAP reliability implementation. A small `TokenManager` subclass returns the
-selected/preview token, and the message manager starts at the selected MID.
-These low-level integration points are necessary because the default high-level
-client replaces user-provided tokens/MIDs and does not expose raw packet capture
-or portable local-port selection. Empty pings use aiocoap's message layer because
-they are not application requests.
-
-**aiocoap is pinned to 0.4.17** because manager wiring is a low-level API, not
-a stable high-level contract. Before upgrading, run the complete loopback and
-GUI suite, especially exact preview bytes, manual/empty tokens, retries,
-separate responses, Observe cancellation and size/local-port controls.
-No aiocoap source is copied or modified, and no library globals are monkey-patched.
-The package's asynchronous Observe iterator may coalesce rapid updates; the
-exchange log still contains every received raw datagram.
