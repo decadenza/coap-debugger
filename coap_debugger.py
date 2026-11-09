@@ -385,9 +385,9 @@ class App:
         self.response_payload.pack(fill="both", expand=True, pady=5)
         actions = ttk.Frame(main)
         actions.pack(fill="x")
-        ttk.Button(actions, text="Summarize", command=self._summarize).pack(side="left", padx=3)
         self.send_button = ttk.Button(actions, text="Send message", command=self._send)
         self.send_button.pack(side="left", padx=3)
+        ttk.Button(actions, text="Summarize", command=self._summarize).pack(side="left", padx=3)
         self.cancel_button = ttk.Button(actions, text="Cancel / stop observing",
                                         command=lambda: self.cancel.set(), state="disabled")
         self.cancel_button.pack(side="left", padx=3)
