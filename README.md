@@ -8,6 +8,8 @@ Qt installation, Arduino tools, or web server. Keep `coap_debugger.py` and
 
 ## Getting started
 
+Run these commands from the project folder with Python 3.10 or newer installed.
+
 **Windows (PowerShell)**
 
 ```powershell
@@ -16,6 +18,7 @@ py -3 -m venv .venv
 python -m pip install -r requirements.txt
 python coap_debugger.py
 ```
+
 **Linux (Debian/Ubuntu)**
 
 ```sh
