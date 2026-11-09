@@ -1,0 +1,2 @@
+# Tkinter is provided by Python/the OS (python3-tk on Debian/Ubuntu).
+aiocoap==0.4.17
