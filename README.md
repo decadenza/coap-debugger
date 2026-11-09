@@ -6,35 +6,25 @@ client example, implemented in Python with Tkinter and **aiocoap**. It needs no
 Qt installation, Arduino tools, or web server. Keep `coap_debugger.py` and
 `aiocoap_backend.py` together.
 
-## Python setup
+## Getting started
 
-Use **Python 3.10 or newer** with Tkinter and a graphical desktop.
+**Windows (PowerShell)**
 
-Windows: install Python from python.org with Tcl/Tk support enabled.
-macOS: the python.org installer includes Tk; some package-manager Python builds
-require their matching Tk package.
-Debian/Ubuntu:
-
-```sh
-sudo apt install python3 python3-venv python3-tk
-```
-
-From this directory:
-
-```sh
-python3 -m venv .venv
-# Linux / macOS:
-source .venv/bin/activate
-# Windows PowerShell instead:
-# .venv\Scripts\Activate.ps1
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 python coap_debugger.py
 ```
+**Linux (Debian/Ubuntu)**
 
-If your system uses `python` rather than `python3`, substitute it in the setup
-commands. `requirements.txt` installs the pinned aiocoap dependency. Tkinter is an OS/Python installation component,
-not a pip dependency. On a headless machine you must supply a graphical display;
-the application is not a browser GUI.
+```sh
+sudo apt install python3 python3-venv python3-tk
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python coap_debugger.py
+```
 
 ## Send a request
 
@@ -142,7 +132,61 @@ will eventually reach the configured response timeout. Cancel is available
 during waiting/retries. The UI remains responsive throughout network activity.
 Do not shorten retry defaults indiscriminately on constrained networks.
 
-## Checks
+## Install and start
+
+Use **Python 3.10 or newer**, Tkinter, and a graphical desktop. Download and
+extract the project, or clone the repository, then open a terminal in the
+project folder. Keep `coap_debugger.py` and `aiocoap_backend.py` together.
+
+### Windows
+
+Install Python 3 from [python.org](https://www.python.org/downloads/) and enable
+the option to add Python to `PATH`. The standard Windows installer includes
+Tkinter. Open PowerShell in the project folder and run:
+
+```powershell
+py -3 --version
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python coap_debugger.py
+```
+
+If PowerShell prevents virtual-environment activation, open Command Prompt in
+the project folder and use:
+
+```bat
+py -3 --version
+py -3 -m venv .venv
+.venv\Scripts\activate.bat
+python -m pip install -r requirements.txt
+python coap_debugger.py
+```
+
+### Linux
+
+On Debian or Ubuntu, install Python, virtual-environment support, and Tkinter:
+
+```sh
+sudo apt install python3 python3-venv python3-tk
+```
+
+Then, from the project folder, run:
+
+```sh
+python3 --version
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python coap_debugger.py
+```
+
+`requirements.txt` installs the pinned aiocoap dependency. Tkinter is an
+OS/Python installation component, not a pip dependency. If `py` is unavailable
+on Windows, use `python` in its place. On a headless machine you must supply a
+graphical display; the application is not a browser GUI.
+
+## Tests
 
 ```sh
 python -m unittest discover -s tests -v
