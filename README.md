@@ -54,10 +54,10 @@ the application is not a browser GUI.
    HEX-encoded JSON still uses Content-Format 50, not 42. Selecting **None**
    omits the option; omission does not imply text/plain. Zero is encoded as an
    empty integer option, not as an omitted option.
-6. Add/edit/remove options as needed, then **Summarize** to inspect the exact
-   header, token, options, payload, and complete wire datagram. An unchanged
-   form sends exactly the summary's generated MID and token. Changing the form
-   regenerates the preview on Send. Blank MID is automatically allocated;
+6. Add/edit/remove options as needed, then optionally select the **Message summary** tab to
+   inspect the exact header, token, options, payload, and complete wire datagram.
+   An unchanged form sends exactly the summary's generated MID and token.
+   Changing the form regenerates the preview on Send. Blank MID is automatically allocated;
    a manual MID accepts decimal or `0x` notation. Blank token generates random
    bytes; type `empty` for zero bytes or supply at most eight HEX bytes.
 7. **Send message** runs off the GUI thread. Inspect **Responses** and

@@ -330,6 +330,7 @@ class App:
         self.tabs.add(preview_tab, text="Message summary")
         self.tabs.add(response_tab, text="Responses")
         self.tabs.add(log_tab, text="Exchange log")
+        self.tabs.bind("<<NotebookTabChanged>>", self._tab_changed)
         self.summary = scrolledtext.ScrolledText(preview_tab, wrap="word", state="disabled")
         self.summary.pack(fill="both", expand=True)
         self.log = scrolledtext.ScrolledText(log_tab, wrap="word", state="disabled")
@@ -387,12 +388,15 @@ class App:
         actions.pack(fill="x")
         self.send_button = ttk.Button(actions, text="Send message", command=self._send)
         self.send_button.pack(side="left", padx=3)
-        ttk.Button(actions, text="Summarize", command=self._summarize).pack(side="left", padx=3)
         self.cancel_button = ttk.Button(actions, text="Cancel / stop observing",
                                         command=lambda: self.cancel.set(), state="disabled")
         self.cancel_button.pack(side="left", padx=3)
         ttk.Button(actions, text="Clear results", command=self._clear_results).pack(side="right")
         ttk.Label(main, textvariable=self.status, wraplength=950).pack(fill="x", pady=(8, 0))
+
+    def _tab_changed(self, _event) -> None:
+        if self.tabs.index("current") == 1:
+            self._summarize()
 
     def _error(self, exc) -> None:
         self.status.set(str(exc))

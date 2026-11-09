@@ -665,6 +665,12 @@ class GUITests(unittest.TestCase):
         self.assertIn("my-endpoint", self.app.summary.get("1.0", "end"))
         self.assertFalse(self.errors.called)
 
+    def test_selecting_summary_tab_builds_preview(self):
+        self.app.tabs.select(1)
+        self.root.update()
+        self.assertIsNotNone(self.app.preview)
+        self.assertIn("Destination:", self.app.summary.get("1.0", "end"))
+
     def test_preview_exact_send_and_payload_view_switch(self):
         received = []
         def serve(sock, stop):
